@@ -32,7 +32,7 @@ public class Zamowienie {
 	
 	public void pozegnanie()
 	{
-		System.out.print("Dziekuje za skorzystanie z moich uslug. \n zycze smacznego!\n");
+		System.out.println("Dziekuje za skorzystanie z moich uslug. \n zycze smacznego!\n");
 	}
 	
 	public String getCiasto()

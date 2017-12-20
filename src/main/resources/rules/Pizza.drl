@@ -117,27 +117,27 @@ rule "Polecana pizza 2"
 		pizza: Pizza()
 	then
 		Set <String> dodatki=tempdodatki;
-		for(String dodatek : dodatki){
-			Set<String> pizze = baza.wyszukajPizzePoDodatkach(dodatek);
+			Set<String> pizze = baza.wyszukajPizzePoKilkuDodatkach(dodatki);
 				            
 			if (pizze.size()>1){            		
 			for (String nazwaPizzy : pizze) {
 				insert(new Fakt("pizza_propozycja", nazwaPizzy));
-						    	//System.out.println();
 				if (!nazwaPizzy.equals("Nothing")){
 						System.out.println("Polecam pizzê:"+nazwaPizzy);
 						  }
 						    }
 						}
 						else {
-							//System.out.println(pizza.getBrakDopasowania());
-							//System.out.println(dodatek);
-							insert(new Fakt("pizza_propozycja", "pizza_specjalna"));
-							System.out.println("Pizza specjalna z " + baza.wyszukajNazwy(dodatek));
-							break;
-					    }
-		//		}
-	}
+						System.out.print("Pizza specjalna z ");
+							for(String dodatek : dodatki)
+							System.out.print(" "+baza.wyszukajNazwy(dodatek));
+							
+							}
+						System.out.println();
+						insert(new Fakt("pizza_propozycja", "pizza_specjalna"));
+					    
+		
+
 		
 	
 end
