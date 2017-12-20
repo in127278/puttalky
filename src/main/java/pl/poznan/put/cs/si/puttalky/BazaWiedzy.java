@@ -70,6 +70,38 @@ public class BazaWiedzy {
     	return result;
     }
     
+    public Set<String> dopasujPizze(String s){
+    	Set<String> result = new HashSet<String>();
+    	for (OWLClass klasa : listaPizz){
+    		if (klasa.toString().toLowerCase().contains(s.toLowerCase()) && s.length()>2){
+    			result.add(klasa.getIRI().toString());
+    		}
+    	}
+    	return result;
+    }
+    
+    public Set<String> znajdzinnepizze(String s){
+    	Set<String> result = new HashSet<String>();
+    	int none=0;
+    	for (OWLClass klasa : listaPizz){	
+    		if (klasa.toString().toLowerCase().contains(s.toLowerCase()) && s.length()>2){
+    	
+			for (org.semanticweb.owlapi.reasoner.Node<OWLClass> subclasses: silnik.getSubClasses(klasa, false)) {
+				if(!subclasses.getRepresentativeElement().toString().equals("owl:Nothing")){
+					result.add(subclasses.getRepresentativeElement().toString());
+					none=1;
+				}
+			}
+			//System.out.println(none);
+			if(none==0){
+				result.add(klasa.getIRI().toString());
+			}
+			
+			}
+    	}
+    	return result;
+    }
+    
     public Set<String> wyszukajPizzePoDodatkach(String iri){
     	Set<String> pizze = new HashSet<String>();
     	OWLObjectProperty maDodatek = manager.getOWLDataFactory().getOWLObjectProperty(IRI.create("http://semantic.cs.put.poznan.pl/ontologie/pizza.owl#maDodatek"));
@@ -87,12 +119,12 @@ public class BazaWiedzy {
 	
 		return pizze;
     }
+    
     public String wyszukajNazwy(String iri){
 
     	
     	OWLClass dodatki = manager.getOWLDataFactory().getOWLClass(IRI.create(iri));
-  
-    	System.out.println(dodatki.getIRI().getFragment());
+    	
     	return(dodatki.getIRI().getFragment());
     }
     
@@ -114,7 +146,8 @@ public class BazaWiedzy {
 		for (OWLClass d:  baza.listaPizz){
 			System.out.println("Pizza: "+d.toString());
 			}
-
+	
+		
 
 	}
 

@@ -33,13 +33,18 @@ rule "Podaj dodatki"
 		parser : Parser()
 		baza : BazaWiedzy()
 	then
-		  dodatek.setMonit("Jaki dodatek powinna zawierac Twoja pizza?:\n");
+		  dodatek.setMonit("Podaj nazwê pizzy? / Jaki dodatek powinna zawierac Twoja pizza?:\n");
 		  dodatek.zadajPytanie();
 		  parser.przetworzOdpowiedz();
 		 
 		for (String slowo : parser.getSlowaKluczowe()){
 			for (String uriKlasy : baza.dopasujDodatek(slowo)) { 
 		        insert(new Fakt("dodatek", uriKlasy));
+		    }
+		    for (String uriKlasy : baza.dopasujPizze(slowo)) { 
+		        insert(new Fakt("dodatek", uriKlasy));
+		        break;
+		        
 		    } 
 		}
 		    		
@@ -72,7 +77,7 @@ rule "Podaj rodzaj ciasta"
 		update(ciasto);
 end
 
-rule "Polecana pizza"
+rule "Polecana pizza - z nazwy"
 	salience 1
 	
 	when
@@ -87,26 +92,53 @@ rule "Polecana pizza"
 		pizza: Pizza()
 	then
 		Set <String> dodatki=tempdodatki;
-		if (dodatki.size()==1){
-			for(String dodatek : dodatki){
-				Set<String> pizze = baza.wyszukajPizzePoDodatkach(dodatek);
-		            
-		        if (pizze.size()>1){            		
-					for (String nazwaPizzy : pizze) {
-						insert(new Fakt("pizza_propozycja", nazwaPizzy));
-				    	//System.out.println();
-				    	if (!nazwaPizzy.equals("Nothing")){
-				       	   System.out.println("Polecam pizzê:"+nazwaPizzy);
-				       	}
-				    }
-				}
-				else {
-					//System.out.println(pizza.getBrakDopasowania());
-					System.out.println(dodatek);
-					System.out.println("pizza specjalna z " + baza.wyszukajNazwy(dodatek));
-			    }
+		for(String dodatek : dodatki){
+			Set <String> pizzaznazwy=baza.znajdzinnepizze(dodatek);
+			for(String nazwy : pizzaznazwy){
+				nazwy = nazwy.replace("<","");
+				nazwy = nazwy.replace(">","");
+				insert(new Fakt("pizza_propozycja", nazwy));
+				System.out.println("Pizze do wyboru:"+baza.wyszukajNazwy(nazwy));
 			}
 		}
+end
+
+rule "Polecana pizza 2"
+	
+	when
+		Fakt(nazwa == "dodatek") && 
+		Fakt(nazwa == "rodzaj_ciasta") && 	
+		not Fakt(nazwa == "pizza_propozycja") &&
+        //$dodatek : Fakt( nazwa == "dodatek")
+        tempdodatki: Set() from accumulate ( Fakt(nazwa == "dodatek", value:wartosc), collectSet(value))
+        //dodatki2: List() from accumulate ( Fakt(nazwa == "dodatek", value:wartosc), collectList(value))
+        //dodatki2: Set() from collect( Fakt(nazwa == "dodatek"))
+		baza: BazaWiedzy()
+		pizza: Pizza()
+	then
+		Set <String> dodatki=tempdodatki;
+		for(String dodatek : dodatki){
+			Set<String> pizze = baza.wyszukajPizzePoDodatkach(dodatek);
+				            
+			if (pizze.size()>1){            		
+			for (String nazwaPizzy : pizze) {
+				insert(new Fakt("pizza_propozycja", nazwaPizzy));
+						    	//System.out.println();
+				if (!nazwaPizzy.equals("Nothing")){
+						System.out.println("Polecam pizzê:"+nazwaPizzy);
+						  }
+						    }
+						}
+						else {
+							//System.out.println(pizza.getBrakDopasowania());
+							//System.out.println(dodatek);
+							insert(new Fakt("pizza_propozycja", "pizza_specjalna"));
+							System.out.println("Pizza specjalna z " + baza.wyszukajNazwy(dodatek));
+							break;
+					    }
+		//		}
+	}
+		
 	
 end
 
